@@ -1,20 +1,60 @@
 import React, { useEffect, useState } from "react";
-import { Grid, TextField, Paper, Button } from "@mui/material";
+import { Grid, TextField, Paper, Button, MenuItem } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { userRegisterAction, userGoogleAuthAction } from "../actions/User";
 import { GoogleLogin } from "react-google-login";
-import { ClIENt_ID } from "../constants/global";
+import { API, ClIENt_ID } from "../constants/global";
+import axios from "axios";
+
+// const currencies = [
+//   {
+//     value: 'kavanur',
+//     label: 'kavanur',
+//   },
+//   {
+//     value: 'manjeri',
+//     label: 'manjeri',
+//   },
+//   {
+//     value: 'bangalore',
+//     label: 'bangalore',
+//   },
+//   {
+//     value: 'eliyarab',
+//     label: 'eliyarmb',
+//   },
+// ];
 
 function Register() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
+
   const { userInfo, loading } = useSelector((state) => state.userInfo);
+  const [places, setPlaces] = useState([]);
+  const [place, setPlace] = React.useState("");
+  useEffect(() => {
+    const fethPlaces = async () => {
+      // /places
+      const { data } = await axios.get(`${API}/places`);
+
+      setPlaces(data.places);
+    };
+    fethPlaces();
+  }, []);
+  const handleChange = (event) => {
+    setPlace(event.target.value);
+  };
+
+  
+
   useEffect(() => {
     if (userInfo) {
       navigate("/");
+    } else {
     }
   }, [userInfo, loading, navigate]);
 
@@ -28,8 +68,8 @@ function Register() {
   };
 
   const submit = async () => {
-    if (email && password) {
-      dispatch(userRegisterAction({ email, password }));
+    if (email && password && place) {
+      dispatch(userRegisterAction({ email, password ,place}));
     } else {
       alert("somthing went wrong");
     }
@@ -72,25 +112,38 @@ function Register() {
               value={email}
             />
           </Grid>
+
           <Grid item xs={12}>
             <TextField
               onChange={inputHandle}
               label="Password"
               name="password"
               type={"password"}
+             
               value={password}
             />
           </Grid>
+
           <Grid item xs={12}>
-            <GoogleLogin
-              theme="dark"
-              clientId={ClIENt_ID}
-              buttonText="SIGN UP WITH GOOGLE"
-              onSuccess={responseSuccesGoogle}
-              onFailure={responseErrorGoogle}
-              cookiePolicy={"single_host_origin"}
-            />
+            <TextField
+              id="standard-select-currency-native"
+              select
+              label="Place"
+              value={place}
+              onChange={handleChange}
+              error={!place?true:false}
+              helperText={!place && "Please select your place"}
+              variant="standard"
+            >
+              { places.map((option) => (
+                 <MenuItem key={option.place} value={option.place}>
+                 {option.place}
+               </MenuItem>
+              ))}
+            </TextField>
           </Grid>
+         
+
           <Grid item xs={12}>
             <h6
               align="end"
@@ -103,6 +156,16 @@ function Register() {
               {" "}
               register{" "}
             </Button>
+          </Grid>
+          <Grid item xs={12}>
+            <GoogleLogin
+              theme="dark"
+              clientId={ClIENt_ID}
+              buttonText="SIGN UP WITH GOOGLE"
+              onSuccess={responseSuccesGoogle}
+              onFailure={responseErrorGoogle}
+              cookiePolicy={"single_host_origin"}
+            />
           </Grid>
         </Grid>
       </Paper>

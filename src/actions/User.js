@@ -7,14 +7,14 @@ import {
   USER_LOGOUT,
 } from "../constants/UserConstants";
 export const userRegisterAction =
-  ({ email, password }) =>
+  ({ email, password,place }) =>
   async (dispatch) => {
     try {
       dispatch({
         type: USER_LOGIN_REQUEST,
       });
 
-      const { data } = await axios.post(`${API}/register`, { email, password });
+      const { data } = await axios.post(`${API}/register`, { email, password,place });
       if (!data.status) {
         alert(" registration fail");
       } else if (data.exist) {
